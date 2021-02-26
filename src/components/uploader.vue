@@ -1,164 +1,198 @@
 <template>
-  <v-app>
-    <v-card min-height="100vh" max-height="auto">
-      <v-row>
-        <v-col md="2"></v-col>
-        <v-col md="9">
-          <v-card max-width="auto">
-            <v-card-title>Uploader</v-card-title>
-            <v-container>
+  <v-col>
+    <v-row justify="center">
+      <v-card class="col-11 col-md-8">
+        <v-card-title>Uploader</v-card-title>
+        <v-row>
+          <v-col cols="12" md="6">
+            <v-row>
+              <v-col cols="9">
+                <v-progress-linear
+                  color="light-blue"
+                  height="10"
+                  striped
+                  indeterminate
+                  v-show="loading"
+                ></v-progress-linear>
+                <input type="file" @change="onFileSelected" class="v-btn"  accept="image/*"/>
+              </v-col>
+              <v-col cols="3">
+                <v-btn
+                  outlined
+                  color="light-blue"
+                  @click="onUpload"
+                  :disabled="this.clicked_upload == false || validateapp == false"
+                >Upload</v-btn>
+              </v-col>
+              <v-col cols="12">
+                <img v-bind:src="imageUrl" class="imgcrop" />
+              </v-col>
+            </v-row>
+          </v-col>
+          <v-col cols="12" md="6">
+            <v-row>
+              <v-col cols="12">
+                <v-form v-model="valid" ref="form" v-show="showoption">
+                  <h3>แอปที่ใช้</h3>
+                  <v-select
+                    v-model="app_selected"
+                    label="App"
+                    :items="['Endomondo[ไทย]','Endomondo[Eng]','Running','Nike Run Club','Strava','Samsung']"
+                  ></v-select>
+
+                  <h3>ระยะเวลา</h3>
+                  <v-text-field
+                    label="Time"
+                    solo
+                    v-model="dataimgpack.timedata"
+                    :rules="[v => !!v || 'Time is required',v => /.+:.+:.+/.test(v) || 'กรุณากรอกเวลาให้ถูกต้อง !!ตัวอย่าง 1:59:40!!']"
+                    filled
+                    :disabled="edit_submit == false"
+                  ></v-text-field>
+                  <h3>ระยะทาง</h3>
+                  <v-text-field
+                    label="Distance"
+                    solo
+                    v-model="dataimgpack.distancedata"
+                    :rules="[v => !!v || 'Distance is required',v=> !isNaN(parseFloat(v)) || 'กรุณากรอกตัวเลข']"
+                    filled
+                    :disabled="edit_submit == false"
+                  ></v-text-field>
+                  <h3>ฝีเท้าเฉลี่ย(Pace)</h3>
+                  <v-text-field
+                    label="Pace : Example => 10:20"
+                    solo
+                    v-model="dataimgpack.pacedata"
+                    :rules="[v => !!v || 'Pace is required', v=> !isNaN(parseFloat(v)) || 'กรุณากรอกตัวเลข' , v => /.+:.+/.test(v) || 'กรุณากรอกฟอร์มให้ถูกต้อง']"
+                    filled
+                    :disabled="edit_submit == false"
+                  ></v-text-field>
+
+                  <h3>แคลอรี่</h3>
+                  <v-text-field
+                    label="Calorie"
+                    solo
+                    v-model="dataimgpack.caloriedata"
+                    :rules="[v => !!v || 'กรุณากรอกแคลอรี่',
+                        v=> !isNaN(parseFloat(v)) || 'กรุณากรอกตัวเลข']"
+                    filled
+                    :disabled="edit_submit == false"
+                  ></v-text-field>
+
+                  <h3>เวลาเริ่ม</h3>
+                  <v-text-field
+                    label="Time Started : Example => 11:12"
+                    solo
+                    v-model="dataimgpack.timestart"
+                    :rules="[v => !!v || 'Time Started is required',
+                        v => /.+:.+/.test(v) || 'Time must be valid']"
+                    filled
+                    :disabled="edit_submit == false"
+                  ></v-text-field>
+
+                  <h3>วันที่</h3>
+                  <v-select
+                    label="Day"
+                    solo
+                    :items="days"
+                    v-model="dataimgpack.datedata_day"
+                    :rules="[v => !!v || 'Day is required']"
+                    :disabled="edit_submit == false"
+                  ></v-select>
+                  <v-select
+                    label="Month"
+                    solo
+                    :items="months"
+                    v-model="dataimgpack.datedata_month"
+                    :rules="[v => !!v || 'Month is required']"
+                    :disabled="edit_submit == false"
+                  ></v-select>
+
+                  <v-select
+                    label="Year"
+                    solo
+                    :items="years"
+                    v-model="dataimgpack.datedata_year"
+                    :rules="[v => !!v || 'Year is required']"
+                    :disabled="edit_submit == false"
+                  ></v-select>
+                  <v-row>
+                    <v-col cols="3">
+                      <v-btn outlined color="light-blue" @click="edit_submit = true">Edit</v-btn>
+                    </v-col>
+                    <v-col cols="6">
+                      <v-btn outlined color="light-blue" @click="showupload = true">Upload Addtional</v-btn>
+                    </v-col>
+                  </v-row>
+                </v-form>
+              </v-col>
+            </v-row>
+            <v-row>
+              <v-col md="6">
+                <v-btn
+                  outlined
+                  color="light-blue"
+                  @click="sendImage"
+                  :disabled="clicked_submit == false"
+                >Submit</v-btn>
+              </v-col>
+            </v-row>
+          </v-col>
+        </v-row>
+      </v-card>
+      <v-dialog v-model="dialog" persistent max-width="200px">
+        <v-card class="pa-3">
+          <v-row justify="center">
+            <h3>Upload Success</h3>
+            <v-card-actions>
+              <v-btn outlined color="light-blue" @click="close">Ok</v-btn>
+            </v-card-actions>
+          </v-row>
+        </v-card>
+      </v-dialog>
+
+      <v-dialog v-model="showupload" persistent max-width="500px">
+        <v-card class="pa-3">
+          <h3>Upload your addtional file</h3>
+          <v-row>
+            <v-col cols="8">
+              <input
+                type="file"
+                outlined
+                color="light-blue"
+                @change="onFileSelected_Add"
+                class="v-btn"
+                accept="image/*"
+              />
               <v-progress-linear
                 color="light-blue"
                 height="10"
                 striped
                 indeterminate
-                v-show="loading"
+                v-show="loading_add"
               ></v-progress-linear>
-              <input type="file" @change="onFileSelected" class="v-btn" />
-              <v-btn @click="onUpload" :disabled="this.clicked_upload == false">Upload</v-btn>
-            </v-container>
-
-            <v-row>
-              <v-col md="5">
-                <img v-bind:src="imageUrl" class="imgcrop" />
-              </v-col>
-              <v-col md="7">
-                <v-row>
-                  <v-col md="12">
-                    <v-form v-model="valid" ref="form" v-show="showoption">
-                      <h3>แอปที่ใช้</h3>
-                      <v-select
-                        v-model="app_selected"
-                        label="App"
-                        :items="['Endomondo[ไทย]','Endomondo[Eng]','Running','Nike Run Club','Strava','Samsung']"
-                      ></v-select>
-
-                      <h3>ระยะเวลา</h3>
-                      <v-text-field
-                        label="Time"
-                        solo
-                        v-model="dataimgpack.timedata"
-                        :rules="[v => !!v || 'Time is required',v => /.+:.+:.+/.test(v) || 'กรุณากรอกเวลาให้ถูกต้อง !!ตัวอย่าง 1:59:40!!']"
-                        filled
-                        :disabled="edit_submit == false"
-                      ></v-text-field>
-                      <h3>ระยะทาง</h3>
-                      <v-text-field
-                        label="Distance"
-                        solo
-                        v-model="dataimgpack.distancedata"
-                        :rules="[v => !!v || 'Distance is required',v=> !isNaN(parseFloat(v)) || 'กรุณากรอกตัวเลข']"
-                        filled
-                        :disabled="edit_submit == false"
-                      ></v-text-field>
-                      <h3>ฝีเท้าเฉลี่ย(Pace)</h3>
-                      <v-text-field
-                        label="Pace"
-                        solo
-                        v-model="dataimgpack.pacedata"
-                        :rules="[v => !!v || 'Pace is required', v=> !isNaN(parseFloat(v)) || 'กรุณากรอกตัวเลข']"
-                        filled
-                        :disabled="edit_submit == false"
-                      ></v-text-field>
-
-                      <h3>แคลอรี่</h3>
-                      <v-text-field
-                        label="Calorie"
-                        solo
-                        v-model="dataimgpack.caloriedata"
-                        :rules="[v => !!v || 'กรุณากรอกแคลอรี่',
-                        v=> !isNaN(parseFloat(v)) || 'กรุณากรอกตัวเลข']"
-                        filled
-                        :disabled="edit_submit == false"
-                      ></v-text-field>
-
-                      <h3>เวลาเริ่ม</h3>
-                      <v-text-field
-                        label="Time Started : Example => 11:12"
-                        solo
-                        v-model="dataimgpack.timestart"
-                        :rules="[v => !!v || 'Time Started is required',
-                        v => /.+:.+/.test(v) || 'Time must be valid']"
-                        filled
-                        :disabled="edit_submit == false"
-                      ></v-text-field>
-
-                      <h3>วันที่</h3>
-                      <v-select
-                        label="Day"
-                        solo
-                        :items="days"
-                        v-model="dataimgpack.datedata_day"
-                        :rules="[v => !!v || 'Day is required']"
-                        
-                        :disabled="edit_submit == false"
-                      ></v-select>
-                      <v-select
-                       
-                        label="Month"
-                        solo
-                        :items="months"
-                         v-model="dataimgpack.datedata_month"
-                        :rules="[v => !!v || 'Month is required']"
-                        :disabled="edit_submit == false"
-                      ></v-select>
-
-                      <v-select
-                       
-                        label="Year"
-                        solo
-                        :items="years"
-                         v-model="dataimgpack.datedata_year"
-                        :rules="[v => !!v || 'Year is required']"
-                
-                        :disabled="edit_submit == false"
-                      ></v-select>
-
-                      <v-btn @click="edit_submit = true">Edit</v-btn>
-                      <v-btn @click="showupload = true">Upload Addtional</v-btn>
-                    </v-form>
-                  </v-col>
-                </v-row>
-                <v-row>
-                  <v-col md="6">
-                    <v-btn @click="sendImage" :disabled="clicked_submit == false">Submit</v-btn>
-                  </v-col>
-                </v-row>
-              </v-col>
-            </v-row>
-          </v-card>
-        </v-col>
-      </v-row>
-    </v-card>
-
-
-    <v-dialog v-model="dialog" persistent max-width="290">
-      <v-card>
-        <v-card-text>Upload Success</v-card-text>
-        <v-card-actions>
-          <v-btn @click="close">Ok</v-btn>
-        </v-card-actions>
-      </v-card>
-    </v-dialog>
-
-    <v-dialog v-model="showupload" persistent max-width="290">
-      <v-card>
-        <h3>Upload your addtional file</h3>
-        <input type="file" @change="onFileSelected_Add" class="v-btn" />
-        <v-progress-linear
-          color="light-blue"
-          height="10"
-          striped
-          indeterminate
-          v-show="loading_add"
-        ></v-progress-linear>
-        <v-btn @click="onUpload_II" :disabled="this.clicked_upload_II == false">Upload</v-btn>
-        <img v-bind:src="imageUrl_II" class="imgcrop" />
-      </v-card>
-
-      <v-btn @click="showupload = false">close</v-btn>
-    </v-dialog>
-  </v-app>
+            </v-col>
+            <v-col cols="4">
+              <v-btn
+                outlined
+                color="light-blue"
+                @click="onUpload_II"
+                :disabled="this.clicked_upload_II == false"
+              >Upload</v-btn>
+            </v-col>
+            <v-col cols="12">
+              <v-spacer></v-spacer>
+              <img v-bind:src="imageUrl_II" class="imgcrop" />
+            </v-col>
+          </v-row>
+          <v-card-actions>
+            <v-spacer></v-spacer>
+            <v-btn text color="light-blue" @click="showupload = false">close</v-btn>
+          </v-card-actions>
+        </v-card>
+      </v-dialog>
+    </v-row>
+  </v-col>
 </template>
 
 <script>
@@ -181,9 +215,66 @@ export default {
       imageCloudUrl_II: null,
       dialog: false,
       valid: false,
-      days:['00','01','02','03','04','05','06','07','08','10','11','12','13','14','15','16','17','18','19','20','21','22','23','24','25','26','27','28','29','30'],
-      months:['00','01','02','03','04','05','06','07','08','10','11','12'],
-      years:['2020','2021','2022','2023','2024','2025','2026','2027','2028','2029','2030'],
+      days: [
+        "01",
+        "02",
+        "03",
+        "04",
+        "05",
+        "06",
+        "07",
+        "08",
+        "10",
+        "11",
+        "12",
+        "13",
+        "14",
+        "15",
+        "16",
+        "17",
+        "18",
+        "19",
+        "20",
+        "21",
+        "22",
+        "23",
+        "24",
+        "25",
+        "26",
+        "27",
+        "28",
+        "29",
+        "30",
+        "31"
+      ],
+      months: [
+        
+        "01",
+        "02",
+        "03",
+        "04",
+        "05",
+        "06",
+        "07",
+        "09",
+        "08",
+        "10",
+        "11",
+        "12"
+      ],
+      years: [
+        "2020",
+        "2021",
+        "2022",
+        "2023",
+        "2024",
+        "2025",
+        "2026",
+        "2027",
+        "2028",
+        "2029",
+        "2030"
+      ],
       dataimgpack: {
         timestart: null,
         timedata: null,
@@ -204,7 +295,7 @@ export default {
   methods: {
     async onFileSelected(event) {
       this.clicked_upload = true;
-      console.log(event.target.files[0]);
+
       const fileReader = new FileReader();
       await fileReader.addEventListener("load", () => {
         this.imageUrl = fileReader.result;
@@ -215,7 +306,7 @@ export default {
     },
     async onFileSelected_Add(event) {
       this.clicked_upload_II = true;
-      console.log(event.target.files[0]);
+
       const fileReader = new FileReader();
       await fileReader.addEventListener("load", () => {
         this.imageUrl_II = fileReader.result;
@@ -230,13 +321,17 @@ export default {
           file: this.imageUrl
         })
         .then(response => {
-          console.log(response);
           this.dialog = true;
           this.imageCloudUrl = response.data.file;
           this.loading = false;
         })
-        .catch(error => {
-          console.log(error);
+        .catch(() => {
+          this.$fire({
+            title: "Error",
+            text: "เกิดข้อผิดพลาด",
+            type: "error",
+            timer: 3000
+          });
         });
     },
     async onUpload_II() {
@@ -247,12 +342,22 @@ export default {
           file: this.imageUrl_II
         })
         .then(response => {
-          console.log(response);
           this.imageCloudUrl_II = response.data.file;
           this.loading_add = false;
+          this.$fire({
+              title: "อัพเดต",
+              text: "อัปโหลดสำเร็จ",
+              type: "success",
+              timer: 3000
+            });
         })
-        .catch(error => {
-          console.log(error);
+        .catch(() => {
+          this.$fire({
+            title: "Error",
+            text: "เกิดข้อผิดพลาด",
+            type: "error",
+            timer: 3000
+          });
         });
     },
     async close() {
@@ -284,7 +389,6 @@ export default {
       }
 
       if (this.imageCloudUrl != null) {
-        console.log(this.imageCloudUrl);
         await axios
           .post(apiendpoint, {
             appselected: this.app_selected,
@@ -303,11 +407,22 @@ export default {
             this.loading = false;
             this.clicked_submit = true;
           })
-          .catch(function(error) {
-            console.log(error);
+          .catch(() => {
+            
+            this.$fire({
+              title: "Error",
+              text: "เกิดข้อผิดพลาด",
+              type: "error",
+              timer: 3000
+            });
           });
       } else {
-        console.log("invalid");
+        this.$fire({
+          title: "Error",
+          text: "เกิดข้อผิดพลาด",
+          type: "error",
+          timer: 3000
+        });
       }
     },
     async sendImage() {
@@ -324,8 +439,6 @@ export default {
         "authorization"
       ] = `Bearer ${this.$store.getters.token}`;
       if (this.$refs.form.validate()) {
-        console.log("valid");
-        console.log(this.dataimgpack);
         await axios
           .post("/usermanage/commituserwork", {
             userworkcal: this.dataimgpack.caloriedata,
@@ -337,29 +450,53 @@ export default {
             userworkstarttime: this.dataimgpack.timestart,
             userworkurlextra: this.imageCloudUrl_II
           })
-          .then(function(response) {
-            console.log(response);
+          .then(function() {
             window.location.reload();
           })
-          .catch(function(error) {
-            console.log(error);
+          .catch(() => {
+            this.clicked_submit = true;
+            this.$fire({
+              title: "Error",
+              text: "เกิดข้อผิดพลาด โปรดติดต่อผู้ดูแลระบบ",
+              type: "error",
+              timer: 3000
+            });
           });
       } else {
-        console.log("invalid form");
+         this.clicked_submit = true;
+        this.$fire({
+          title: "Error",
+          text: "เกิดข้อผิดพลาด กรุณาตรวจสอบข้อมูล",
+          type: "error",
+          timer: 3000
+        });
       }
     },
     async gettable() {
       await axios
         .post("/usermanage/getuserallwork", {})
         .then(response => {
-          console.log(response.data);
           this.$store.commit("getTable", response.data.data);
         })
-        .catch(function(error) {
-          console.log(error);
+        .catch(function() {
+          this.$fire({
+            title: "Error",
+            text: "เกิดข้อผิดพลาด",
+            type: "error",
+            timer: 3000
+          });
         });
     }
-  }
+  },
+  computed: {
+    validateapp(){
+      if(this.app_selected == null ){
+        return false
+      }else{
+        return true
+      }
+    }
+  },
 };
 </script>
 

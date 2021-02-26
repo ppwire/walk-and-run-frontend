@@ -10,6 +10,7 @@ export default new Vuex.Store({
     username: localStorage.getItem('username') || null,
     token: localStorage.getItem('access_token') || null,
     datatable: null,
+    managesection:true,
     role: localStorage.getItem('user_role')||null
   },
   mutations: {
@@ -27,6 +28,12 @@ export default new Vuex.Store({
     },
     getTable(state, value) {
       state.datatable = value
+    },
+    switchSectionOff(state){
+      state.managesection = false
+    },
+    switchSectionOn(state){
+      state.managesection = true
     }
   },
   getters: {
@@ -36,7 +43,8 @@ export default new Vuex.Store({
     username: state => state.username,
     token: state => state.token,
     datatable: state => state.datatable,
-    role: state => state.role
+    role: state => state.role,
+    managesection: state => state.managesection
   },
   actions: {
     retrieveToken(context, data) {
@@ -56,12 +64,9 @@ export default new Vuex.Store({
               context.commit('retrieveToken', token)
               axios.defaults.headers.post['authorization'] = `Bearer ${this.state.token}`
             }
-            
             resolve(response)
-
           })
           .catch(function (error) {
-            console.log(error);
             reject(error)
           })
       })

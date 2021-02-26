@@ -1,111 +1,148 @@
 <template>
   <v-app>
-    <v-row class="cardsearch" v-show="showSection">
-      <v-col cols="6">
-        <h3 class="blue-grey--text textpadding">ปีการศึกษา</h3>
-        <v-select v-model="selectedYear" :items="sectionyear"></v-select>
-      </v-col>
-      <v-col cosl="6">
-        <h3 class="blue-grey--text textpadding">เทอม</h3>
-        <v-select v-model="selectedSemester" :items="['1','2']"></v-select>
-      </v-col>
-    </v-row>
-
-    <v-card v-for="section in filterSection" :key="section.sectionnumber" v-show="showSection">
-      <v-layout row wrap>
-        <v-flex>
+    <div>
+      <v-row v-show="showSection">
+        <v-col cols="6">
+          <h3 class="blue-grey--text textpadding">ปีการศึกษา</h3>
+          <v-select v-model="selectedYear" :items="sectionyear" class="ml-5 mr-7"></v-select>
+        </v-col>
+        <v-col cols="6">
+          <h3 class="blue-grey--text textpadding">เทอม</h3>
+          <v-select v-model="selectedSemester" :items="['1','2']" class="mr-4 ml-4"></v-select>
+        </v-col>
+      </v-row>
+    </div>
+    <v-divider class="mx-4 blue" v-show="showSection"></v-divider>
+    <div
+      v-for="section in filterSection"
+      :key="section.sectionnumber"
+      v-show="showSection"
+      class="homecard text-center mb-1"
+    >
+      <v-divider class="mx-4"></v-divider>
+      <v-row>
+        <v-col cols="3">
           <strong class="blue-grey--text textpadding">เลขเซคชั่น</strong>
           <div class="textpadding">{{section.sectionnumber}}</div>
-        </v-flex>
-        <v-flex>
+        </v-col>
+
+        <v-col cols="3">
           <strong class="blue-grey--text">วันที่เรียน</strong>
           <div>{{section.sectionday}}</div>
-        </v-flex>
-        <v-flex>
+        </v-col>
+
+        <v-col cols="3">
           <strong class="blue-grey--text">เวลาเรียน</strong>
           <div>{{section.sectiontime}}</div>
-        </v-flex>
-        <v-btn @click="viewSection(section.sectionid)">View</v-btn>
-      </v-layout>
-    </v-card>
+        </v-col>
+
+        <v-col cols="2">
+          <v-btn text color="blue" @click="viewSection(section.sectionid)">View</v-btn>
+        </v-col>
+      </v-row>
+    </div>
 
     <div v-show="showUser">
-      <v-card v-for="user in users" :key="user.username">
-        <v-layout row wrap>
-          <v-avatar size="62">
-            <img v-bind:src="user.userprofile" @click="viewProfile(user.userprofile)" />
-          </v-avatar>
-          <v-flex>
-            <strong class="blue-grey--text textpadding">รหัสประจำตัว</strong>
-            <div class="textpadding">{{user.usernumber}}</div>
-          </v-flex>
-          <v-flex>
-            <strong class="blue-grey--text textpadding">ชื่อ</strong>
-            <div class="textpadding">{{user.username}}</div>
-          </v-flex>
-          <v-flex>
+      <v-btn class="ma-2" color="blue" text @click="backToSection()">
+        <v-icon dark left>mdi-arrow-left</v-icon>Back
+      </v-btn>
+      <div v-for="user in users" :key="user.username" class="homecard ma-3 ml-6">
+        <v-divider class="mx mb-1 mt-1"></v-divider>
+        <v-row>
+          <v-col cols="6" md="1">
+            <v-avatar size="45">
+              <img v-bind:src="user.userprofile" @click="viewProfile(user.userprofile)" />
+            </v-avatar>
+          </v-col>
+          <v-col cols="6" md="2">
+            <strong class="blue-grey--text">รหัสประจำตัว</strong>
+            <div class>{{user.usernumber}}</div>
+          </v-col>
+          <v-col cols="6" md="2">
+            <strong class="blue-grey--text">ชื่อ</strong>
+            <div class>{{user.username}}</div>
+          </v-col>
+          <v-col cols="6" md="2">
             <strong class="blue-grey--text">นามสกุล</strong>
             <div>{{user.userlastname}}</div>
-          </v-flex>
-          <v-flex>
+          </v-col>
+          <v-col cols="4" md="2">
             <strong class="blue-grey--text">ภาควิชา</strong>
             <div>{{user.userdepartment}}</div>
-          </v-flex>
-          <v-btn @click="viewCulUserWork(user.userid); calSum();">สรุป</v-btn>
-          <v-btn @click="viewUserWork(user.userid)">ดูรายละเอียด</v-btn>
-        </v-layout>
-      </v-card>
-      <v-btn @click="backToSection()">Back</v-btn>
+          </v-col>
+          <v-col cols="4" md="1">
+            <v-btn color="blue" text @click="viewCulUserWork(user.userid); calSum();">สรุป</v-btn>
+          </v-col>
+          <v-col cols="4" md="1">
+            <v-btn color="blue" text @click="viewUserWork(user.userid)">ดูรายละเอียด</v-btn>
+          </v-col>
+        </v-row>
+      </div>
     </div>
 
     <div v-show="showWork">
-      <v-card v-for="userwork in userworks" :key="userwork.workid">
+      <v-btn class="ma-2 mb-2" color="blue" text @click="backToUser()">
+        <v-icon dark left>mdi-arrow-left</v-icon>Back
+      </v-btn>
+      <v-card v-for="userwork in userworks" :key="userwork.workid" class="workcard pa-1 mb-10">
         <v-row>
-          <v-col md="4">
+          <v-col cols="12" md="3">
             <v-img v-bind:src="userwork.userworkurl"></v-img>
           </v-col>
-          <v-col md="8">
+          <v-col cols="12" md="9" mg="3" class="pa-6">
+            <v-divider class="mx-4 d-md-none"></v-divider>
             <v-row>
-              <v-col md="6">
-                <strong class="blue-grey--text">ครั้งที่</strong>
-                <div>{{userwork.userworkcounter}}</div>
+              <v-col cols="12" md="12">
+                <div class="text-center text-md-left">
+                  <strong class="blue-grey--text">ครั้งที่</strong>
+                  <div class="border-style: solid">{{userwork.userworkcounter}}</div>
+                </div>
               </v-col>
-              <v-col md="6">
+              <v-col cols="4" md="4">
                 <strong class="blue-grey--text">Distance</strong>
                 <div>{{userwork.userworkdistance}}</div>
               </v-col>
-              <v-col md="6">
-                <strong class="blue-grey--text">Date</strong>
-                <div>{{userwork.userworkdate}}</div>
-              </v-col>
-              <v-col md="6">
+              <v-col cols="4" md="4">
                 <strong class="blue-grey--text">Calorie</strong>
                 <div>{{userwork.userworkcal}}</div>
               </v-col>
-              <v-col md="6">
+              <v-col cols="4" md="4">
                 <strong class="blue-grey--text">Pace</strong>
                 <div>{{userwork.userworkpace}}</div>
               </v-col>
-              <v-col md="6">
+              <v-col cols="4" md="4">
+                <strong class="blue-grey--text">Date</strong>
+                <div>{{userwork.userworkdate}}</div>
+              </v-col>
+              <v-col cols="4" md="4">
                 <strong class="blue-grey--text">Time</strong>
                 <div>{{userwork.userworktime}}</div>
               </v-col>
-              <v-col md="6">
+              <v-col cols="4" md="4">
                 <strong class="blue-grey--text">Started Time</strong>
                 <div>{{userwork.userworkstarttime}}</div>
               </v-col>
-              <v-col md="6">
-                <v-btn @click="showImg(userwork.userworkurlextra)">Check Additional Image</v-btn>
-                <v-btn @click="editwork(userwork)">Edit</v-btn>
+              <v-col cols="9" md="12">
+                <v-btn
+                  outlined
+                  color="light-blue"
+                  @click="showImg(userwork.userworkurlextra)"
+                >Check Additional Image</v-btn>
+              </v-col>
+              <v-col cols="3" md="12">
+                <v-btn outlined color="light-blue" @click="editwork(userwork)">Edit</v-btn>
               </v-col>
             </v-row>
           </v-col>
         </v-row>
       </v-card>
-      <v-btn @click="backToUser()">Back</v-btn>
     </div>
 
     <div v-show="showCulWork">
+      <v-btn class="ma-2" color="blue" text @click="backToUser()">
+        <v-icon dark left>mdi-arrow-left</v-icon>Back
+      </v-btn>
+      <v-divider class="mx-4"></v-divider>
       <v-card max-width="auto">
         <v-simple-table>
           <template v-slot:default>
@@ -129,42 +166,51 @@
         </v-simple-table>
       </v-card>
 
-      <v-card max-width="auto" class="cardsum">
+      <v-card max-width="auto" class="cardsum text-center pa-3">
         <v-row>
-          <v-col>
-            <strong class="blue-grey--text">ผลรวมระยะทาง (กิโลเมตร)</strong>
-            <p>{{sumdistance}}</p>
+          <v-col cols="12" md="6">
+            <v-row>
+              <v-col>
+                <strong class="blue-grey--text">ผลรวมระยะทาง (กิโลเมตร)</strong>
+                <p>{{sumdistance}}</p>
+              </v-col>
+              <v-col>
+                <strong class="blue-grey--text">ความเร็วเฉลี่ย (นาที/กิโลเมตร)</strong>
+                <p>{{sumpace}}</p>
+              </v-col>
+            </v-row>
           </v-col>
-          <v-col>
-            <strong class="blue-grey--text">ความเร็วเฉลี่ย (นาที/กิโลเมตร)</strong>
-            <p>{{sumpace}}</p>
-          </v-col>
-          <v-col>
-            <strong class="blue-grey--text">ผลรวมระยะเวลา (ชม:นาที:วินาที)</strong>
-            <p>{{sumtime}}</p>
-          </v-col>
-          <v-col>
-            <strong class="blue-grey--text">ผลรวมแคลลอรี่ (กิโลแคลลอรี่)</strong>
-            <p>{{sumcal}}</p>
+          <v-col cols="12" md="6">
+            <v-row>
+              <v-col>
+                <strong class="blue-grey--text">ผลรวมระยะเวลา (ชม:นาที:วินาที)</strong>
+                <p>{{sumtime}}</p>
+              </v-col>
+              <v-col>
+                <strong class="blue-grey--text">ผลรวมแคลลอรี่ (กิโลแคลลอรี่)</strong>
+                <p>{{sumcal}}</p>
+              </v-col>
+            </v-row>
           </v-col>
         </v-row>
       </v-card>
-
-      <v-btn @click="backToUser()">Back</v-btn>
     </div>
-    <v-dialog v-model="showProfile" class="cardholderimg">
-      <img v-bind:src="currentProfile" class="imgcard" />
+
+    <v-dialog v-model="showProfile" class="cardholderimg" max-width="600px">
+      <img v-bind:src="currentProfile" />
     </v-dialog>
 
-    <v-dialog v-model="Img">
+    <v-dialog v-model="Img" max-width="500px">
       <v-img v-bind:src="currentimg"></v-img>
     </v-dialog>
 
     <v-dialog v-model="editworkdialog">
       <v-card>
-        <v-card-title>แก้ไข</v-card-title>
         <v-container>
           <v-row>
+            <v-col cols="12">
+              <h2>แก้ไข</h2>
+            </v-col>
             <v-col cols="6">
               <h3>ระยะทาง</h3>
               <v-text-field
@@ -233,8 +279,9 @@
             </v-col>
           </v-row>
           <v-card-actions>
-            <v-btn @click="editworkdialog=false">Close</v-btn>
-            <v-btn @click="postEditwork">Submit</v-btn>
+            <v-spacer></v-spacer>
+            <v-btn text color="light-blue" @click="editworkdialog=false">Close</v-btn>
+            <v-btn text color="light-blue" @click="postEditwork">Submit</v-btn>
           </v-card-actions>
         </v-container>
       </v-card>
@@ -298,6 +345,7 @@ export default {
       this.Img = false;
     },
     backToSection() {
+      this.$store.commit("switchSectionOn");
       this.showUser = false;
       this.showWork = false;
       this.showCulWork = false;
@@ -316,13 +364,18 @@ export default {
           usersection: text
         })
         .then(response => {
-          console.log(response.data);
+          this.$store.commit("switchSectionOff");
           this.users = response.data.data;
           this.showSection = false;
           this.showUser = true;
         })
-        .catch(function(error) {
-          console.log(error);
+        .catch(function() {
+          this.$fire({
+            title: "Error",
+            text: "เกิดข้อผิดพลาด",
+            type: "error",
+            timer: 3000
+          });
         });
     },
     async viewUserWork(text) {
@@ -331,13 +384,17 @@ export default {
           userid: text
         })
         .then(response => {
-          console.log(response.data);
           this.userworks = response.data.data;
           this.showUser = false;
           this.showWork = true;
         })
-        .catch(function(error) {
-          console.log(error);
+        .catch(function() {
+          this.$fire({
+            title: "Error",
+            text: "เกิดข้อผิดพลาด",
+            type: "error",
+            timer: 3000
+          });
         });
     },
     async viewCulUserWork(text) {
@@ -346,7 +403,6 @@ export default {
           userid: text
         })
         .then(response => {
-          console.log(response.data);
           this.userworkculs = response.data.data;
           this.showUser = false;
           this.showWork = false;
@@ -418,15 +474,18 @@ export default {
 
           finalpacemin.toString;
 
-          console.log(finalpacemin + ":" + finalpacesec);
-          console.log(hour_time + ":" + minute_time + ":" + second_time);
           this.sumpace = finalpacemin + ":" + finalpacesec;
           this.sumtime = hour_time + ":" + minute_time + ":" + second_time;
           (this.sumdistance = temp_distance.toPrecision(5)),
             (this.sumcal = temp_cal);
         })
-        .catch(function(error) {
-          console.log(error);
+        .catch(function() {
+          this.$fire({
+            title: "Error",
+            text: "เกิดข้อผิดพลาด",
+            type: "error",
+            timer: 3000
+          });
         });
     },
     viewProfile(url) {
@@ -460,8 +519,7 @@ export default {
           userworkolddate: this.editolddate,
           userid: this.editid
         })
-        .then(response => {
-          console.log(response.data);
+        .then(() => {
           this.editworkdialog = false;
           // window.location.reload();
           this.showWork = false;
@@ -469,8 +527,13 @@ export default {
           this.showCulWork = false;
           this.showUser = true;
         })
-        .catch(function(error) {
-          console.log(error);
+        .catch(function() {
+          this.$fire({
+            title: "Error",
+            text: "เกิดข้อผิดพลาด",
+            type: "error",
+            timer: 3000
+          });
         });
     }
   },
@@ -490,21 +553,23 @@ export default {
     await axios
       .post("/admin/getallsection", {})
       .then(response => {
-        console.log(response.data.data);
         this.sections = response.data.data;
         this.showUser = false;
         this.showWork = false;
         this.showCulWork = false;
       })
-      .catch(function(error) {
-        console.log(error);
+      .catch(function() {
+        this.$fire({
+          title: "Error",
+          text: "เกิดข้อผิดพลาด",
+          type: "error",
+          timer: 3000
+        });
       });
 
     await axios
       .post("/admin/getallsectionbyyear", {})
       .then(response => {
-        console.log("selected:year");
-        console.log(response.data.data);
         let i = 0;
         while (i < response.data.data.length) {
           this.sectionyear.push(response.data.data[i].sectionyear);
@@ -514,8 +579,13 @@ export default {
         this.showWork = false;
         this.showCulWork = false;
       })
-      .catch(function(error) {
-        console.log(error);
+      .catch(function() {
+        this.$fire({
+          title: "Error",
+          text: "เกิดข้อผิดพลาด",
+          type: "error",
+          timer: 3000
+        });
       });
   }
 };
@@ -531,7 +601,6 @@ export default {
 }
 
 .cardsearch {
-  max-height: 200px;
 }
 
 .imgcard {

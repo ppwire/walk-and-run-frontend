@@ -1,13 +1,10 @@
 <template>
-  <v-app>
-    <v-card min-height="100vh" max-height="auto">
-      <v-row>
-        <v-col md="2"></v-col>
-        <v-col md="9">
-          <subevent :key='componentkey'></subevent>
-        </v-col>
-      </v-row>
-      <v-row>
+  <v-col>
+    <v-row justify="center">
+      <v-col cols="12" md="8">
+        <subevent :key="componentkey"></subevent>
+      </v-col>
+      <v-col cols="12">
         <v-row justify="center">
           <v-dialog v-model="dialog" persistent max-width="600px">
             <template v-slot:activator="{ on }">
@@ -23,34 +20,32 @@
                     <v-row>
                       <v-col cols="12">
                         <v-text-field
-                        v-model="eventtitle"
+                          v-model="eventtitle"
                           :rules="[v => !!v || 'กรุณาเติมข้อมูลให้ครบ']"
                           label="ชื่อ Event"
                           required
                         ></v-text-field>
                       </v-col>
                       <v-col cols="12">
-                        <v-text-field
-                        v-model="eventdes"
-                          height="200"
+                        <v-textarea
+                          v-model="eventdes"
                           :rules="[v => !!v || 'กรุณาเติมข้อมูลให้ครบ']"
                           label="คำอธิบาย Event"
                           required
-                        ></v-text-field>
+                        ></v-textarea>
                       </v-col>
-                      <v-col cols="6">
+                      <v-col cols="12">
                         <v-select
-                        v-model="eventtype"
-                          
+                          v-model="eventtype"
                           :rules="[v => !!v || 'กรุณาเติมข้อมูลให้ครบ']"
                           :items="['คูณ','เปอร์เซ็น','ปัดเศษ']"
                           label="ประเภท"
                           required
                         ></v-select>
                       </v-col>
-                      <v-col cols="6">
+                      <v-col cols="12">
                         <v-text-field
-                        v-model="eventvalue"
+                          v-model="eventvalue"
                           :rules="[v => !!v || 'กรุณาเติมข้อมูลให้ครบ']"
                           label="Value"
                           required
@@ -71,20 +66,20 @@
             </v-card>
           </v-dialog>
         </v-row>
-      </v-row>
-    </v-card>
-  </v-app>
+      </v-col>
+    </v-row>
+  </v-col>
 </template>
 
 <script>
 import axios from "axios";
-import subEvent from './subevent.vue'
+import subEvent from "./subevent.vue";
 export default {
-  components:{
-    subevent : subEvent
+  components: {
+    subevent: subEvent
   },
   data: () => ({
-    componentkey:0,
+    componentkey: 0,
     dialog: false,
     eventtitle: null,
     eventdes: null,
@@ -95,31 +90,33 @@ export default {
   }),
   methods: {
     async submitEvent() {
-
-      if(this.eventtype == 'คูณ'){
-        this.eventtype = 'M'
-      }else if (this.eventtype == 'เปอร์เซ็น'){
-        this.eventtype = 'P'
-      }else if (this.eventtype == 'ปัดเศษ'){
-        this.eventtype = 'C'
+      if (this.eventtype == "คูณ") {
+        this.eventtype = "M";
+      } else if (this.eventtype == "เปอร์เซ็น") {
+        this.eventtype = "P";
+      } else if (this.eventtype == "ปัดเศษ") {
+        this.eventtype = "C";
       }
-      
 
       await axios
         .post("/admin/insertevent", {
-          eventtitle:this.eventtitle,
-          eventdes:this.eventdes,
-          eventtype:this.eventtype,
-          eventvalue:this.eventvalue,
-          eventdate:this.eventdate
+          eventtitle: this.eventtitle,
+          eventdes: this.eventdes,
+          eventtype: this.eventtype,
+          eventvalue: this.eventvalue,
+          eventdate: this.eventdate
         })
         .then(response => {
-          console.log(response.data.data);
           this.events = response.data.data;
-          this.componentkey++
+          this.componentkey++;
         })
-        .catch(function(error) {
-          console.log(error);
+        .catch(function() {
+          this.$fire({
+            title: "Error",
+            text: "เกิดข้อผิดพลาด",
+            type: "error",
+            timer: 3000
+          });
         });
     }
   }

@@ -1,13 +1,11 @@
 <template>
-  <v-app>
-    <v-card min-height="100vh" max-height="auto">
-      <v-row>
-        <v-col md="2"></v-col>
-        <v-col md="9">
-          <subhome :key="componentkey"></subhome>
-        </v-col>
-      </v-row>
-      <v-row>
+  <v-col>
+    <v-row justify="center">
+      <v-col cols="12" md="8">
+        <subhome :key="componentkey"></subhome>
+      </v-col>
+
+      <v-col cols="12">
         <v-row justify="center">
           <v-dialog v-model="dialog" persistent max-width="600px">
             <template v-slot:activator="{ on }">
@@ -30,13 +28,12 @@
                         ></v-text-field>
                       </v-col>
                       <v-col cols="12">
-                        <v-text-field
+                        <v-textarea
                           v-model="boardtext"
-                          height="200"
                           :rules="[v => !!v || 'กรุณาเติมข้อมูลให้ครบ']"
                           label="คำอธิบาย"
                           required
-                        ></v-text-field>
+                        ></v-textarea>
                       </v-col>
                     </v-row>
                   </v-container>
@@ -50,9 +47,9 @@
             </v-card>
           </v-dialog>
         </v-row>
-      </v-row>
-    </v-card>
-  </v-app>
+      </v-col>
+    </v-row>
+  </v-col>
 </template>
 
 <script>
@@ -84,12 +81,15 @@ export default {
           boardtext: this.boardtext,
           boarddate: new Date().toLocaleString()
         })
-        .then(response => {
-          console.log(response.data.data);
+        .then(() => {
           this.componentkey++;
         })
-        .catch(function(error) {
-          console.log(error);
+        .catch(function() {
+          this.$fire({
+            title: "Error",
+            text: "เกิดข้อผิดพลาด",
+            type: "error"
+          });
         });
     }
   }

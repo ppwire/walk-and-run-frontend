@@ -12,7 +12,7 @@ const routes = [
   {
     path: '/register', name: 'register', component: showRegister, beforeEnter: (to, from, next) => {
       if (store.getters.loggedIn == true) {
-        console.log('not logged In')
+       
         next({
           name: 'homepage'
         })
@@ -24,7 +24,7 @@ const routes = [
   {
     path: '/', name: 'login', component: showLogin, beforeEnter: (to, from, next) => {
       if (store.getters.loggedIn == true) {
-        console.log('not logged In')
+        
         next({
           name: 'homepage'
         })
@@ -36,7 +36,7 @@ const routes = [
   {
     path: '/homepage', name: 'homepage', component: showHome, beforeEnter: (to, from, next) => {
       if (store.getters.loggedIn == false) {
-        console.log('not logged In')
+       
         next({
           name: 'login'
         })
